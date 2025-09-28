@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v2
         with:
@@ -30,3 +32,23 @@ jobs:
           mkdir -p testproject/testapp/management/commands
           cp ../fish_django_completions.py testproject/testapp/management/commands
           ./manage.py fish_django_completions
+
+      - name: Install fish shell
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fish
+
+      - name: Generate output files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          fish generate_output.fish
+
+      - name: Commit generated output
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add output/
+          git diff --staged --quiet || git commit -m "Auto-update Django completions for new versions"
+          git push
