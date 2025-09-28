@@ -1,5 +1,5 @@
 #!/usr/bin/fish
-for v in 2.2 3.1 3.2
+for v in 5.0 5.1 5.2
     if not test -d output/venv$v
         python3 -m venv output/venv$v
     end
